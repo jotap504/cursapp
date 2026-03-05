@@ -44,7 +44,7 @@ export const createPreference = async (course, user) => {
             }
         );
 
-        return response.data;
+        return response.data.id;
     } catch (error) {
         // Log the full MP error response to help debug
         console.error('Error creating preference:', error.response?.data || error.message);
