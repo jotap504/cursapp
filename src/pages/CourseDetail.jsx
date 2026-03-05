@@ -11,6 +11,16 @@ export default function CourseDetail() {
     const [curso, setCurso] = useState(null);
     const [enrolled, setEnrolled] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [playing, setPlaying] = useState(false);
+
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
+
+    const youtubeId = curso ? getYoutubeId(curso.video_url) : null;
 
     useEffect(() => {
         const checkEnrollment = async () => {
@@ -79,15 +89,24 @@ export default function CourseDetail() {
 
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                    {enrolled ? (
-                        <a
-                            href={curso.video_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl shadow-primary/40 active:scale-95 transition-all group/play"
+                    {enrolled && playing && youtubeId ? (
+                        <div className="absolute inset-0 bg-black z-10 animate-in fade-in duration-500">
+                            <iframe
+                                className="w-full h-full"
+                                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                                title="YouTube video player"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            ></iframe>
+                        </div>
+                    ) : enrolled ? (
+                        <button
+                            onClick={() => youtubeId ? setPlaying(true) : window.open(curso.video_url, '_blank')}
+                            className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl shadow-primary/40 active:scale-95 transition-all group/play z-20"
                         >
                             <Play fill="white" size={32} className="ml-1 transition-transform group-hover/play:scale-110" />
-                        </a>
+                        </button>
                     ) : (
                         <button
                             onClick={handleBuy}
