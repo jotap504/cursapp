@@ -15,31 +15,6 @@ export default function MyAccount() {
     const [updating, setUpdating] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
 
-    if (authLoading) return (
-        <div className="min-h-screen bg-background-dark flex items-center justify-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        </div>
-    );
-
-    if (!user) return (
-        <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white/5 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-xl text-center max-w-sm w-full shadow-2xl"
-            >
-                <div className="w-20 h-20 bg-red-500/10 text-red-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <LogOut size={40} />
-                </div>
-                <h2 className="text-2xl font-black text-slate-100 mb-4">Sesión Expirada</h2>
-                <p className="text-slate-400 mb-8 font-medium italic">Tu sesión ya no es válida o debes iniciar sesión para continuar.</p>
-                <Link to="/" className="block w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-all text-sm">
-                    Volver al Inicio
-                </Link>
-            </motion.div>
-        </div>
-    );
-
     const getYoutubeId = (url) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -98,6 +73,31 @@ export default function MyAccount() {
 
         if (user) handleMPRedirect();
     }, [user]);
+
+    if (authLoading) return (
+        <div className="min-h-screen bg-background-dark flex items-center justify-center">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+    );
+
+    if (!user) return (
+        <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white/5 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-xl text-center max-w-sm w-full shadow-2xl"
+            >
+                <div className="w-20 h-20 bg-red-500/10 text-red-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <LogOut size={40} />
+                </div>
+                <h2 className="text-2xl font-black text-slate-100 mb-4">Sesión Expirada</h2>
+                <p className="text-slate-400 mb-8 font-medium italic">Tu sesión ya no es válida o debes iniciar sesión para continuar.</p>
+                <Link to="/" className="block w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-all text-sm">
+                    Volver al Inicio
+                </Link>
+            </motion.div>
+        </div>
+    );
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
