@@ -28,6 +28,7 @@ export const createPreference = async (course, user) => {
                 failure: `${window.location.origin}/mi-cuenta?status=failure`,
                 pending: `${window.location.origin}/mi-cuenta?status=pending`,
             },
+            auto_return: 'approved',
         };
 
         console.log('MP payload:', JSON.stringify(payload, null, 2));
