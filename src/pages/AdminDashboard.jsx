@@ -1,7 +1,8 @@
 import { Link, Routes, Route, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, LogOut, HelpCircle } from 'lucide-react';
 import CourseManagement from '../components/admin/CourseManagement';
 import SiteSettings from '../components/admin/SiteSettings';
+import FAQManagement from '../components/admin/FAQManagement';
 
 export default function AdminDashboard() {
     const location = useLocation();
@@ -9,6 +10,7 @@ export default function AdminDashboard() {
     const menuItems = [
         { name: 'Panel Principal', path: '/admin', icon: LayoutDashboard },
         { name: 'Gestión de Cursos', path: '/admin/courses', icon: BookOpen },
+        { name: 'Gestión de FAQs', path: '/admin/faqs', icon: HelpCircle },
         { name: 'Configuración Web', path: '/admin/settings', icon: Settings },
     ];
 
@@ -22,7 +24,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                         <h2 className="text-sm font-black text-slate-100 uppercase tracking-widest leading-none">Admin</h2>
-                        <span className="text-[10px] text-primary font-bold uppercase tracking-[0.2em]">Management</span>
+                        <span className="text-[10px] text-primary font-bold uppercase tracking-[0.2em]">Gestión</span>
                     </div>
                 </div>
 
@@ -55,6 +57,7 @@ export default function AdminDashboard() {
                 <Routes>
                     <Route path="/" element={<AdminHome />} />
                     <Route path="/courses" element={<CourseManagement />} />
+                    <Route path="/faqs" element={<FAQManagement />} />
                     <Route path="/settings" element={<SiteSettings />} />
                 </Routes>
             </main>

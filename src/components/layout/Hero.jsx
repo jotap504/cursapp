@@ -24,7 +24,7 @@ export default function Hero() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                     </span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">New Era of Healing</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Nueva Era de Sanación</span>
                 </motion.div>
 
                 {/* Main Heading */}
@@ -47,43 +47,7 @@ export default function Hero() {
                     {settings.hero_subtitulo}
                 </motion.p>
 
-                {/* CTAs */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex flex-col sm:flex-row w-full max-w-md gap-4 mt-4"
-                >
-                    <button className="flex-1 bg-primary text-white font-black py-5 rounded-2xl shadow-2xl shadow-primary/40 active:scale-95 transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 group">
-                        Explore Courses
-                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-                    <button className="flex-1 bg-white/5 border border-white/10 text-white font-black py-5 rounded-2xl backdrop-blur-md active:scale-95 transition-all text-sm uppercase tracking-widest hover:bg-white/10">
-                        View Free Trial
-                    </button>
-                </motion.div>
 
-                {/* Social Proof */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                    className="mt-12 flex flex-col items-center gap-4"
-                >
-                    <div className="flex -space-x-3">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="w-10 h-10 rounded-full border-2 border-background-dark bg-slate-800 overflow-hidden">
-                                <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" />
-                            </div>
-                        ))}
-                        <div className="w-10 h-10 rounded-full border-2 border-background-dark bg-primary flex items-center justify-center text-[10px] font-bold text-white">
-                            +2k
-                        </div>
-                    </div>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                        Joined by <span className="text-slate-200">12,000+</span> seekers worldwide
-                    </p>
-                </motion.div>
             </div>
         </section>
     );

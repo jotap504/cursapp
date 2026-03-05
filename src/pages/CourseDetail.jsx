@@ -4,6 +4,7 @@ import { supabase } from '../supabase/client';
 import { useAuth } from '../hooks/useAuth';
 import { Star, Clock, Users, Play, Shield, Globe, Award, CheckCircle, ExternalLink } from 'lucide-react';
 import { createPreference } from '../services/mercadoPago';
+import CourseReviews from '../components/courses/CourseReviews';
 
 export default function CourseDetail() {
     const { id } = useParams();
@@ -74,7 +75,7 @@ export default function CourseDetail() {
         </div>
     );
 
-    if (!curso) return <div>Curso no encontrado</div>;
+    if (!curso) return <div className="min-h-screen bg-background-dark flex items-center justify-center text-white">Curso no encontrado</div>;
 
     return (
         <div className="min-h-screen bg-background-dark text-slate-100 pb-20">
@@ -203,6 +204,11 @@ export default function CourseDetail() {
                             </div>
                         </section>
                     )}
+
+                    {/* Course Reviews Section */}
+                    <div className="pt-12 border-t border-white/5">
+                        <CourseReviews cursoId={id} user={user} />
+                    </div>
                 </div>
 
                 {/* Right Sidebar - Purchase Card */}
@@ -241,7 +247,7 @@ export default function CourseDetail() {
                             <h3 className="text-xs font-black uppercase tracking-widest">Este curso incluye:</h3>
                             <ul className="space-y-3">
                                 <li className="flex items-center gap-3 text-sm font-bold opacity-70">
-                                    <Play size={16} /> 24 lecciones en video HD
+                                    <Play size={16} /> Contenido en Video HD
                                 </li>
                                 <li className="flex items-center gap-3 text-sm font-bold opacity-70">
                                     <Award size={16} /> Certificado de finalización
