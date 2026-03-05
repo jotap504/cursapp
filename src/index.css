@@ -1,0 +1,288 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════
+   THEME SYSTEM — 5 Distinct Modern Palettes
+   Each theme controls: bg, primary accent, secondary, text
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── THEME 1: Amber Earth (Warm, earthy, premium) ── */
+:root,
+html[data-theme="1"] {
+  --c-primary: #d97706;
+  /* Amber 600            */
+  --c-primary-h: #b45309;
+  /* Amber 700 (hover)    */
+  --c-secondary: #fbbf24;
+  /* Amber 400            */
+  --c-bg-dark: #1a120b;
+  /* Deep espresso brown  */
+  --c-bg-card: #241810;
+  /* Slightly lighter     */
+  --c-bg-surface: #2d1f13;
+  --c-text-bright: #fef3c7;
+  /* Cream                */
+  --c-glow: 161, 98, 7;
+  /* for shadows          */
+}
+
+/* ── THEME 2: Ocean Cyber (Electric, cool, techy) ── */
+html[data-theme="2"] {
+  --c-primary: #06b6d4;
+  /* Cyan 500             */
+  --c-primary-h: #0891b2;
+  /* Cyan 600 (hover)     */
+  --c-secondary: #38bdf8;
+  /* Sky 400              */
+  --c-bg-dark: #020c1b;
+  /* Deep space navy      */
+  --c-bg-card: #071829;
+  --c-bg-surface: #0a2138;
+  --c-text-bright: #e0f2fe;
+  /* Light sky            */
+  --c-glow: 6, 182, 212;
+}
+
+/* ── THEME 3: Emerald Forest (Lush, natural, vibrant) ── */
+html[data-theme="3"] {
+  --c-primary: #10b981;
+  /* Emerald 500          */
+  --c-primary-h: #059669;
+  /* Emerald 600 (hover)  */
+  --c-secondary: #4ade80;
+  /* Green 400            */
+  --c-bg-dark: #031a0e;
+  /* Deep forest black    */
+  --c-bg-card: #07261a;
+  --c-bg-surface: #0c3123;
+  --c-text-bright: #d1fae5;
+  /* Mint cream           */
+  --c-glow: 16, 185, 129;
+}
+
+/* ── THEME 4: Crimson Noir (Bold, luxury, dramatic) ── */
+html[data-theme="4"] {
+  --c-primary: #f43f5e;
+  /* Rose 500             */
+  --c-primary-h: #e11d48;
+  /* Rose 600 (hover)     */
+  --c-secondary: #fb7185;
+  /* Rose 400             */
+  --c-bg-dark: #160508;
+  /* Near-black dark rose */
+  --c-bg-card: #1f0910;
+  --c-bg-surface: #2a1018;
+  --c-text-bright: #ffe4e6;
+  /* Blush white          */
+  --c-glow: 244, 63, 94;
+}
+
+/* ── THEME 5: Pearl Light (White, minimal, elegant) ── */
+html[data-theme="5"] {
+  --c-primary: #64748b;
+  /* Slate 500 — delicate    */
+  --c-primary-h: #475569;
+  /* Slate 600 — hover       */
+  --c-secondary: #94a3b8;
+  /* Slate 400               */
+  --c-bg-dark: #f8fafc;
+  /* Almost white            */
+  --c-bg-card: #f1f5f9;
+  /* Slate 100               */
+  --c-bg-surface: #e2e8f0;
+  /* Slate 200               */
+  --c-text-bright: #1e293b;
+  /* Slate 800               */
+  --c-glow: 100, 116, 139;
+}
+
+/* Light theme: flip all white text to dark */
+html[data-theme="5"] .text-slate-100 {
+  color: #1e293b !important;
+}
+
+html[data-theme="5"] .text-slate-200 {
+  color: #334155 !important;
+}
+
+html[data-theme="5"] .text-slate-400 {
+  color: #64748b !important;
+}
+
+html[data-theme="5"] .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html[data-theme="5"] .text-slate-600 {
+  color: #475569 !important;
+}
+
+/* Light theme: flip dark cards to light grays */
+html[data-theme="5"] .bg-white\/5 {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-theme="5"] .bg-white\/10 {
+  background-color: #e2e8f0 !important;
+}
+
+html[data-theme="5"] .bg-black\/60 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html[data-theme="5"] .border-white\/5 {
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme="5"] .border-white\/10 {
+  border-color: #cbd5e1 !important;
+}
+
+html[data-theme="5"] .border-white\/20 {
+  border-color: #94a3b8 !important;
+}
+
+/* Light theme: hero button override — use outline style */
+html[data-theme="5"] button.bg-white\/5 {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FORCE OVERRIDES — trump Tailwind's compiled output
+   ═══════════════════════════════════════════════════════════ */
+
+/* Backgrounds */
+.bg-primary {
+  background-color: var(--c-primary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--c-secondary) !important;
+}
+
+.bg-background-dark {
+  background-color: var(--c-bg-dark) !important;
+}
+
+/* Text */
+.text-primary {
+  color: var(--c-primary) !important;
+}
+
+.text-secondary {
+  color: var(--c-secondary) !important;
+}
+
+/* Borders */
+.border-primary {
+  border-color: var(--c-primary) !important;
+}
+
+.border-secondary {
+  border-color: var(--c-secondary) !important;
+}
+
+/* Opacity variants */
+.bg-primary\/5 {
+  background-color: color-mix(in srgb, var(--c-primary) 5%, transparent) !important;
+}
+
+.bg-primary\/10 {
+  background-color: color-mix(in srgb, var(--c-primary) 10%, transparent) !important;
+}
+
+.bg-primary\/20 {
+  background-color: color-mix(in srgb, var(--c-primary) 20%, transparent) !important;
+}
+
+.bg-primary\/30 {
+  background-color: color-mix(in srgb, var(--c-primary) 30%, transparent) !important;
+}
+
+.bg-secondary\/20 {
+  background-color: color-mix(in srgb, var(--c-secondary) 20%, transparent) !important;
+}
+
+.text-primary\/50 {
+  color: color-mix(in srgb, var(--c-primary) 50%, transparent) !important;
+}
+
+.border-primary\/20 {
+  border-color: color-mix(in srgb, var(--c-primary) 20%, transparent) !important;
+}
+
+.border-primary\/10 {
+  border-color: color-mix(in srgb, var(--c-primary) 10%, transparent) !important;
+}
+
+/* Hover states */
+.hover\:bg-primary:hover {
+  background-color: var(--c-primary-h) !important;
+}
+
+.hover\:text-primary:hover {
+  color: var(--c-primary) !important;
+}
+
+.hover\:border-primary:hover {
+  border-color: var(--c-primary) !important;
+}
+
+/* Focus states */
+.focus\:border-primary:focus {
+  border-color: var(--c-primary) !important;
+}
+
+/* Gradients */
+.from-primary {
+  --tw-gradient-from: var(--c-primary) !important;
+}
+
+.to-primary {
+  --tw-gradient-to: var(--c-primary) !important;
+}
+
+.from-secondary {
+  --tw-gradient-from: var(--c-secondary) !important;
+}
+
+.to-secondary {
+  --tw-gradient-to: var(--c-secondary) !important;
+}
+
+/* Shadows */
+.shadow-primary\/20 {
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--c-primary) 20%, transparent) !important;
+}
+
+.shadow-primary\/40 {
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--c-primary) 40%, transparent) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL BASE
+   ═══════════════════════════════════════════════════════════ */
+
+html,
+body,
+#root {
+  background-color: var(--c-bg-dark);
+  font-family: 'Montserrat', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Playfair Display', serif;
+}
