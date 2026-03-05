@@ -2,16 +2,28 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 import { useAuth } from '../hooks/useAuth';
-import { Star, Clock, Users, Play, Shield, Globe, Award, CheckCircle } from 'lucide-react';
+import { Star, Clock, Users, Play, Shield, Globe, Award, CheckCircle, ExternalLink } from 'lucide-react';
 import { createPreference } from '../services/mercadoPago';
 
 export default function CourseDetail() {
     const { id } = useParams();
     const { user } = useAuth();
     const [curso, setCurso] = useState(null);
+    const [enrolled, setEnrolled] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const checkEnrollment = async () => {
+            if (!user) return;
+            const { data, error } = await supabase
+                .from('inscripciones')
+                .select('id')
+                .eq('usuario_id', user.id)
+                .eq('curso_id', id)
+                .single();
+            if (!error && data) setEnrolled(true);
+        };
+
         const fetchCurso = async () => {
             try {
                 const { data, error } = await supabase
@@ -21,6 +33,7 @@ export default function CourseDetail() {
                     .single();
                 if (error) throw error;
                 setCurso(data);
+                if (user) checkEnrollment();
             } catch (error) {
                 console.error('Error fetching course:', error);
             } finally {
@@ -28,7 +41,7 @@ export default function CourseDetail() {
             }
         };
         fetchCurso();
-    }, [id]);
+    }, [id, user]);
 
     const handleBuy = async () => {
         if (!user) {
@@ -66,9 +79,23 @@ export default function CourseDetail() {
 
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <button className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl shadow-primary/40 active:scale-95 transition-all group/play">
-                        <Play fill="white" size={32} className="ml-1 transition-transform group-hover/play:scale-110" />
-                    </button>
+                    {enrolled ? (
+                        <a
+                            href={curso.video_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl shadow-primary/40 active:scale-95 transition-all group/play"
+                        >
+                            <Play fill="white" size={32} className="ml-1 transition-transform group-hover/play:scale-110" />
+                        </a>
+                    ) : (
+                        <button
+                            onClick={handleBuy}
+                            className="w-20 h-20 bg-slate-500/50 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-all group/play"
+                        >
+                            <Play fill="white" size={32} className="ml-1 opacity-50" />
+                        </button>
+                    )}
                 </div>
 
                 {/* Course Info Brief */}
@@ -129,6 +156,34 @@ export default function CourseDetail() {
                             </div>
                         </section>
                     )}
+
+                    {enrolled && curso.archivos?.length > 0 && (
+                        <section className="space-y-8">
+                            <h2 className="text-2xl font-black uppercase tracking-widest text-primary">Material Adjunto</h2>
+                            <div className="space-y-4">
+                                {curso.archivos.map((file, i) => (
+                                    <a
+                                        key={i}
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-between p-6 rounded-3xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                                <Shield size={20} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-black text-slate-200">{file.nombre || 'Archivo adjunto'}</h4>
+                                                <span className="text-[10px] font-black uppercase text-slate-500">Documento PDF / Recurso</span>
+                                            </div>
+                                        </div>
+                                        <ExternalLink size={18} className="text-primary opacity-0 group-hover:opacity-100 transition-all" />
+                                    </a>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </div>
 
                 {/* Right Sidebar - Purchase Card */}
@@ -143,12 +198,20 @@ export default function CourseDetail() {
                         </div>
 
                         <div className="space-y-4">
-                            <button
-                                onClick={handleBuy}
-                                className="w-full bg-primary text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all shadow-xl shadow-primary/40"
-                            >
-                                Inscribirme Ahora
-                            </button>
+                            {enrolled ? (
+                                <div className="p-6 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-500 text-center space-y-2">
+                                    <CheckCircle size={32} className="mx-auto" />
+                                    <h4 className="text-sm font-black uppercase tracking-widest">Ya estás inscrito</h4>
+                                    <p className="text-[10px] font-bold opacity-70">Disfruta de todo el material exclusivo de este curso.</p>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handleBuy}
+                                    className="w-full bg-primary text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all shadow-xl shadow-primary/40"
+                                >
+                                    Inscribirme Ahora
+                                </button>
+                            )}
                             <div className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 <Shield size={12} />
                                 Garantía de 7 días
