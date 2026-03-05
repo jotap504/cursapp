@@ -127,14 +127,7 @@ export default function MyAccount() {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-[60px] group-hover:bg-primary/40 transition-colors"></div>
 
                         <div className="relative flex flex-col items-center text-center gap-6">
-                            <div className="w-24 h-24 rounded-[2rem] overflow-hidden border-4 border-primary/20 shadow-2xl">
-                                <img src={user.foto || user.photoURL} alt={user.nombre} className="w-full h-full object-cover" />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-black leading-tight">{user.nombre}</h3>
-                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">{user.email}</p>
-                            </div>
-                            <div className="w-full pt-6 border-t border-white/5 space-y-4">
+                            <div className="w-full space-y-4">
                                 {!user.rol || user.rol !== 'admin' ? (
                                     <button
                                         onClick={async () => {
