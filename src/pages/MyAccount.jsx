@@ -30,8 +30,9 @@ export default function MyAccount() {
             const paymentId = params.get('payment_id');
 
             if (status === 'success' && cursoId && user) {
+                console.log('Detectada redirección de éxito de MP. Registrando curso:', cursoId);
                 // Registrar inscripción si no existe
-                const { error } = await supabase
+                const { error, data } = await supabase
                     .from('inscripciones')
                     .insert([
                         {
@@ -40,12 +41,23 @@ export default function MyAccount() {
                             payment_id: paymentId,
                             status: 'approved'
                         }
-                    ]);
+                    ])
+                    .select();
 
-                if (!error || error.code === '23505') { // 23505 is unique violation
-                    // Limpiar URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                if (error) {
+                    if (error.code === '23505') {
+                        console.log('El curso ya estaba registrado.');
+                    } else {
+                        console.error('Error al registrar inscripción:', error);
+                        alert('Error al registrar el curso: ' + error.message);
+                    }
+                } else {
+                    console.log('¡Curso registrado con éxito!', data);
+                    alert('¡Inscripción confirmada! Ya podés ver tu curso.');
                 }
+
+                // Limpiar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
             fetchInscripciones();
         };
