@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { Star, MessageSquare, Send, User } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function CourseReviews({ cursoId, user }) {
     const [reviews, setReviews] = useState([]);
@@ -11,31 +12,42 @@ export default function CourseReviews({ cursoId, user }) {
     const [submitting, setSubmitting] = useState(false);
 
     const fetchReviews = async () => {
-        const { data, error } = await supabase
-            .from('resenas')
-            .select('*, perfiles:usuario_id(nombre, foto)')
-            .eq('curso_id', cursoId)
-            .order('created_at', { ascending: false });
+        try {
+            const { data, error } = await supabase
+                .from('resenas')
+                .select('*, perfiles:usuario_id(nombre, foto)')
+                .eq('curso_id', cursoId)
+                .order('created_at', { ascending: false });
 
-        if (!error) {
-            setReviews(data || []);
-            if (user) {
-                const reviewed = data.find(r => r.usuario_id === user.id);
-                if (reviewed) setHasReviewed(true);
+            if (!error) {
+                setReviews(data || []);
+                if (user) {
+                    const reviewed = data.find(r => r.usuario_id === user.id);
+                    if (reviewed) setHasReviewed(true);
+                }
+            } else {
+                console.warn('Reviews table not found or restricted:', error.message);
             }
+        } catch (err) {
+            console.error('Fetch reviews error:', err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const checkEnrollment = async () => {
         if (!user) return;
-        const { data, error } = await supabase
-            .from('inscripciones')
-            .select('id')
-            .eq('usuario_id', user.id)
-            .eq('curso_id', cursoId)
-            .single();
-        if (!error && data) setHasEnrolled(true);
+        try {
+            const { data, error } = await supabase
+                .from('inscripciones')
+                .select('id')
+                .eq('usuario_id', user.id)
+                .eq('curso_id', cursoId)
+                .single();
+            if (!error && data) setHasEnrolled(true);
+        } catch (err) {
+            console.error('Check enrollment error:', err);
+        }
     };
 
     useEffect(() => {
@@ -70,19 +82,34 @@ export default function CourseReviews({ cursoId, user }) {
 
     return (
         <section className="space-y-12">
-            <div className="flex flex-col md:flex-row items-baseline gap-4">
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="flex flex-col md:flex-row items-baseline gap-4"
+            >
                 <h2 className="text-2xl font-black uppercase tracking-widest text-accent-orange">Reseñas de Alumnos</h2>
                 {reviews.length > 0 && (
-                    <div className="flex items-center gap-2 text-accent-orange bg-accent-orange/10 px-4 py-1 rounded-full border border-accent-orange/20">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-2 text-accent-orange bg-accent-orange/10 px-4 py-1 rounded-full border border-accent-orange/20"
+                    >
                         <Star size={16} fill="currentColor" />
-                        <span className="font-black text-sm">{averageRating} caloficación promedio</span>
+                        <span className="font-black text-sm">{averageRating} calificación promedio</span>
                         <span className="text-[10px] font-bold opacity-60">({reviews.length} opiniones)</span>
-                    </div>
+                    </motion.div>
                 )}
-            </div>
+            </motion.div>
 
             {hasEnrolled && !hasReviewed && (
-                <form onSubmit={handleSubmit} className="p-8 rounded-[2.5rem] bg-white/5 border border-primary/20 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                <motion.form
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    onSubmit={handleSubmit}
+                    className="p-8 rounded-[2.5rem] bg-white/5 border border-primary/20 space-y-6"
+                >
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary">
                             <Star size={24} />
@@ -124,15 +151,22 @@ export default function CourseReviews({ cursoId, user }) {
                             <Send size={16} /> {submitting ? 'Enviando...' : 'Publicar Reseña'}
                         </button>
                     </div>
-                </form>
+                </motion.form>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {loading ? (
                     <div className="col-span-full py-12 text-center text-slate-500 italic">Cargando reseñas...</div>
                 ) : reviews.length > 0 ? (
-                    reviews.map((review) => (
-                        <div key={review.id} className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-white/20 transition-all flex flex-col gap-6">
+                    reviews.map((review, idx) => (
+                        <motion.div
+                            key={review.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/[0.02] transition-all flex flex-col gap-6"
+                        >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 bg-slate-800">
@@ -158,12 +192,16 @@ export default function CourseReviews({ cursoId, user }) {
                             <p className="text-slate-400 font-medium leading-relaxed italic text-sm">
                                 "{review.comentario}"
                             </p>
-                        </div>
+                        </motion.div>
                     ))
                 ) : (
-                    <div className="col-span-full py-12 text-center text-slate-600 font-medium uppercase tracking-widest text-xs border-2 border-dashed border-white/5 rounded-[2.5rem]">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="col-span-full py-12 text-center text-slate-600 font-medium uppercase tracking-widest text-xs border-2 border-dashed border-white/5 rounded-[2.5rem]"
+                    >
                         Aún no hay reseñas para este curso. Sé el primero en opinar.
-                    </div>
+                    </motion.div>
                 )}
             </div>
         </section>

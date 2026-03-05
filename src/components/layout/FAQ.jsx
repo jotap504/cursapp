@@ -36,8 +36,12 @@ export default function FAQ() {
 
                 <div className="flex flex-col gap-4">
                     {faqs.map((faq, idx) => (
-                        <div
+                        <motion.div
                             key={faq.id || idx}
+                            initial={{ opacity: 0, y: 10 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.1 }}
                             className={`border rounded-[2rem] transition-all duration-300 ${openIndex === idx ? "border-earth-300 bg-sand-50 shadow-lg" : "border-sand-200 bg-white hover:border-earth-200"
                                 }`}
                         >
@@ -56,7 +60,7 @@ export default function FAQ() {
                                     {faq.respuesta}
                                 </p>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>
