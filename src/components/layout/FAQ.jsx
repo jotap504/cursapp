@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { supabase } from '../../supabase/client';
+import { motion } from 'framer-motion';
 
 export default function FAQ() {
     const [openIndex, setOpenIndex] = useState(null);
