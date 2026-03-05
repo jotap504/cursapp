@@ -3,7 +3,8 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../supabase/client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Settings, BookOpen, CreditCard, LogOut, ChevronRight, User, ExternalLink, Play, Download, FileText, X } from 'lucide-react';
+import { Settings, BookOpen, CreditCard, LogOut, ChevronRight, User, ExternalLink, Play, Download, FileText, X, Star, MessageSquare } from 'lucide-react';
+import CourseReviews from '../components/courses/CourseReviews';
 
 export default function MyAccount() {
     const { user, loading: authLoading, logout, claimAdmin } = useAuth();
@@ -14,6 +15,14 @@ export default function MyAccount() {
     const [passwordForm, setPasswordForm] = useState({ password: '', confirmPassword: '' });
     const [updating, setUpdating] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
+    const [expandedReviews, setExpandedReviews] = useState({}); // { cursoId: boolean }
+
+    const toggleReviews = (cursoId) => {
+        setExpandedReviews(prev => ({
+            ...prev,
+            [cursoId]: !prev[cursoId]
+        }));
+    };
 
     const getYoutubeId = (url) => {
         if (!url) return null;
@@ -234,9 +243,13 @@ export default function MyAccount() {
                                                     </div>
 
                                                     <div className="flex flex-wrap gap-3">
-                                                        <Link to={`/curso/${curso.id}`} className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-white hover:text-slate-900 transition-all flex items-center gap-2">
-                                                            Ver Detalle <ChevronRight size={14} />
-                                                        </Link>
+                                                        <button
+                                                            onClick={() => toggleReviews(curso.id)}
+                                                            className={`px-6 py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${expandedReviews[curso.id] ? 'bg-accent-orange text-white border-accent-orange' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white hover:text-slate-900'}`}
+                                                        >
+                                                            <Star size={14} fill={expandedReviews[curso.id] ? "currentColor" : "none"} />
+                                                            {expandedReviews[curso.id] ? 'Cerrar Reseñas' : 'Dejar Reseña'}
+                                                        </button>
                                                         {youtubeId && !isPlaying && (
                                                             <button
                                                                 onClick={() => setSelectedVideo(curso.id)}
@@ -248,6 +261,12 @@ export default function MyAccount() {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {expandedReviews[curso.id] && (
+                                                <div className="pt-8 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-500">
+                                                    <CourseReviews cursoId={curso.id} user={user} />
+                                                </div>
+                                            )}
 
                                             {isPlaying && youtubeId && (
                                                 <div className="relative aspect-video rounded-3xl overflow-hidden bg-black border border-white/10 animate-in fade-in slide-in-from-top-2 duration-500">

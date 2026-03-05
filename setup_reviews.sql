@@ -1,4 +1,7 @@
-CREATE TABLE IF NOT EXISTS public.resenas (
+-- Borramos la tabla si existe para asegurar que las relaciones (Foreign Keys) se creen de cero correctamente
+DROP TABLE IF EXISTS public.resenas CASCADE;
+
+CREATE TABLE public.resenas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     curso_id UUID REFERENCES public.cursos(id) ON DELETE CASCADE,
     usuario_id UUID REFERENCES public.usuarios(id) ON DELETE CASCADE,

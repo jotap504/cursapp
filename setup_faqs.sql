@@ -15,7 +15,7 @@ CREATE POLICY "FAQs are viewable by everyone" ON public.faqs
 DROP POLICY IF EXISTS "FAQs are manageable by admins" ON public.faqs;
 CREATE POLICY "FAQs are manageable by admins" ON public.faqs
     USING (EXISTS (
-        SELECT 1 FROM public.perfiles
+        SELECT 1 FROM public.usuarios
         WHERE id = auth.uid() AND rol = 'admin'
     ));
 
