@@ -81,7 +81,7 @@ export default function CourseDetail() {
             {/* Video Hero Section */}
             <div className="relative w-full aspect-video md:aspect-[21/9] overflow-hidden group">
                 <img
-                    src={curso.imagen || "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200"}
+                    src={curso.imagen_url || curso.imagen || "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200"}
                     alt={curso.nombre}
                     className="w-full h-full object-cover brightness-50 transition-transform duration-1000 group-hover:scale-105"
                 />
@@ -176,7 +176,7 @@ export default function CourseDetail() {
                         </section>
                     )}
 
-                    {enrolled && curso.archivos?.length > 0 && (
+                    {enrolled && Array.isArray(curso.archivos) && curso.archivos.length > 0 && (
                         <section className="space-y-8">
                             <h2 className="text-2xl font-black uppercase tracking-widest text-primary">Material Adjunto</h2>
                             <div className="space-y-4">

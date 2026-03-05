@@ -107,7 +107,9 @@ export default function CourseManagement() {
                 .upload(path, item.file, { upsert: true });
 
             if (error) {
+                console.error('Upload error:', error);
                 updater(i, { status: 'error' });
+                alert(`Error al subir ${item.file.name}: ${error.message}`);
             } else {
                 const { data: urlData } = supabase.storage.from('course-files').getPublicUrl(data.path);
                 updater(i, { status: 'done', progress: 100, url: urlData.publicUrl });
@@ -157,8 +159,8 @@ export default function CourseManagement() {
             fetchCourses();
             alert('Curso guardado correctamente');
         } catch (error) {
-            console.error(error);
-            alert('Error al guardar el curso');
+            console.error('Save error:', error);
+            alert('Error al guardar el curso: ' + (error.message || 'Error desconocido'));
         }
     };
 
