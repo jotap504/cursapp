@@ -3,12 +3,20 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../supabase/client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Settings, BookOpen, CreditCard, LogOut, ChevronRight, User, ExternalLink } from 'lucide-react';
+import { Settings, BookOpen, CreditCard, LogOut, ChevronRight, User, ExternalLink, Play, Download, FileText, X } from 'lucide-react';
 
 export default function MyAccount() {
     const { user, logout, claimAdmin } = useAuth();
     const [inscripciones, setInscripciones] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedVideo, setSelectedVideo] = useState(null);
+
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
 
     const fetchInscripciones = async () => {
         if (!user) return;
@@ -153,37 +161,117 @@ export default function MyAccount() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                         {loading ? (
                             <div className="col-span-full py-12 text-center text-slate-500 font-medium italic">
                                 Cargando tus cursos...
                             </div>
                         ) : inscripciones.length > 0 ? (
-                            inscripciones.map((ins) => (
-                                <Link key={ins.id} to={`/cursos/${ins.cursos.id}`} className="p-6 rounded-[2.5rem] bg-white/5 border border-white/10 group hover:border-primary/50 transition-all cursor-pointer">
-                                    <div className="flex gap-6">
-                                        <div className="w-24 h-24 rounded-3xl overflow-hidden flex-shrink-0 border border-white/10">
-                                            <img src={ins.cursos.imagen_url || ins.cursos.imagen} alt={ins.cursos.nombre} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div className="flex flex-col justify-center gap-2">
-                                            <h4 className="text-lg font-black group-hover:text-primary transition-colors leading-tight">{ins.cursos.nombre}</h4>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest">Activo</div>
-                                                <span className="text-[10px] font-bold text-slate-500">Comprado: {new Date(ins.fecha).toLocaleDateString()}</span>
+                            inscripciones.map((ins) => {
+                                const curso = ins.cursos;
+                                const youtubeId = getYoutubeId(curso.video_url);
+                                const isPlaying = selectedVideo === curso.id;
+
+                                return (
+                                    <div key={ins.id} className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 group hover:border-primary/30 transition-all flex flex-col gap-8">
+                                        <div className="flex flex-col md:flex-row gap-8">
+                                            <div className="w-full md:w-48 h-48 rounded-3xl overflow-hidden flex-shrink-0 border border-white/10 relative">
+                                                <img src={curso.imagen_url || curso.imagen} alt={curso.nombre} className="w-full h-full object-cover" />
+                                                {youtubeId && !isPlaying && (
+                                                    <button
+                                                        onClick={() => setSelectedVideo(curso.id)}
+                                                        className="absolute inset-0 bg-black/40 flex items-center justify-center group/play transition-colors hover:bg-black/20"
+                                                    >
+                                                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/40 group-hover/play:scale-110 transition-transform">
+                                                            <Play fill="white" size={20} className="ml-1" />
+                                                        </div>
+                                                    </button>
+                                                )}
                                             </div>
-                                            <div className="mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary group-hover:gap-2 transition-all">
-                                                Comenzar <ExternalLink size={10} />
+
+                                            <div className="flex-1 flex flex-col justify-between">
+                                                <div>
+                                                    <div className="flex flex-wrap items-center gap-3 mb-3">
+                                                        <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest">Activo</div>
+                                                        <span className="text-[10px] font-bold text-slate-500">Comprado: {new Date(ins.fecha).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <h4 className="text-2xl font-black group-hover:text-primary transition-colors leading-tight mb-2">{curso.nombre}</h4>
+                                                    <p className="text-sm text-slate-400 font-medium italic line-clamp-2 mb-6">"{curso.descripcion}"</p>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-3">
+                                                    <Link to={`/curso/${curso.id}`} className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-white hover:text-slate-900 transition-all flex items-center gap-2">
+                                                        Ver Detalle <ChevronRight size={14} />
+                                                    </Link>
+                                                    {youtubeId && !isPlaying && (
+                                                        <button
+                                                            onClick={() => setSelectedVideo(curso.id)}
+                                                            className="px-6 py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest transition-all hover:bg-primary-dark active:scale-95 flex items-center gap-2"
+                                                        >
+                                                            <Play size={14} /> Ver Clase
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {isPlaying && youtubeId && (
+                                            <div className="relative aspect-video rounded-3xl overflow-hidden bg-black border border-white/10 animate-in fade-in slide-in-from-top-2 duration-500">
+                                                <button
+                                                    onClick={() => setSelectedVideo(null)}
+                                                    className="absolute top-4 right-4 z-10 p-2 bg-black/60 rounded-full text-white hover:bg-primary transition-colors"
+                                                >
+                                                    <X size={20} />
+                                                </button>
+                                                <iframe
+                                                    className="w-full h-full"
+                                                    src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                                                    title="YouTube video player"
+                                                    frameBorder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
+                                                ></iframe>
+                                            </div>
+                                        )}
+
+                                        {Array.isArray(curso.archivos) && curso.archivos.length > 0 && (
+                                            <div className="pt-6 border-t border-white/5">
+                                                <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                                                    <Download size={14} /> Materiales del curso ({curso.archivos.length})
+                                                </h5>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {curso.archivos.map((archivo, idx) => (
+                                                        <a
+                                                            key={idx}
+                                                            href={archivo.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group/file"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                                                    <FileText size={14} />
+                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-300 truncate max-w-[150px]">{archivo.nombre}</span>
+                                                            </div>
+                                                            <Download size={14} className="text-slate-500 group-hover/file:text-primary transition-colors" />
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </Link>
-                            ))
+                                );
+                            })
                         ) : (
-                            <Link to="/cursos" className="p-6 rounded-[2.5rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group hover:border-primary/50 transition-all cursor-pointer text-slate-500 hover:text-primary">
-                                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                                    <BookOpen size={24} />
+                            <Link to="/cursos" className="p-12 rounded-[2.5rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-4 group hover:border-primary/50 transition-all cursor-pointer text-slate-500 hover:text-primary">
+                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                    <BookOpen size={32} />
                                 </div>
-                                <span className="text-xs font-black uppercase tracking-widest">Explorar nuevos caminos</span>
+                                <div className="text-center">
+                                    <span className="block text-sm font-black uppercase tracking-widest mb-1">Tu camino espiritual está por comenzar</span>
+                                    <span className="text-xs font-medium">Explora nuestro catálogo y activa tu primer curso.</span>
+                                </div>
                             </Link>
                         )}
                     </div>
