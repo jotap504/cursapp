@@ -93,7 +93,7 @@ export default function CourseDetail() {
                         <div className="absolute inset-0 bg-black z-10 animate-in fade-in duration-500">
                             <iframe
                                 className="w-full h-full"
-                                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                                src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`}
                                 title="YouTube video player"
                                 frameBorder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
