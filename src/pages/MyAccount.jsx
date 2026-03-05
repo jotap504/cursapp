@@ -10,8 +10,10 @@ export default function MyAccount() {
     const [inscripciones, setInscripciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedVideo, setSelectedVideo] = useState(null);
-
-    // ... (rest of the helpers and effects)
+    const [activeTab, setActiveTab] = useState('cursos'); // 'cursos' | 'pagos' | 'settings'
+    const [passwordForm, setPasswordForm] = useState({ password: '', confirmPassword: '' });
+    const [updating, setUpdating] = useState(false);
+    const [msg, setMsg] = useState({ type: '', text: '' });
 
     if (authLoading) return (
         <div className="min-h-screen bg-background-dark flex items-center justify-center">
@@ -38,10 +40,64 @@ export default function MyAccount() {
         </div>
     );
 
-    const [activeTab, setActiveTab] = useState('cursos'); // 'cursos' | 'pagos' | 'settings'
-    const [passwordForm, setPasswordForm] = useState({ password: '', confirmPassword: '' });
-    const [updating, setUpdating] = useState(false);
-    const [msg, setMsg] = useState({ type: '', text: '' });
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
+
+    const fetchInscripciones = async () => {
+        if (!user) return;
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('inscripciones')
+            .select('*, cursos(*)')
+            .eq('usuario_id', user.id);
+
+        if (!error) setInscripciones(data || []);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        const handleMPRedirect = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const status = params.get('status');
+            const cursoId = params.get('cursoId');
+            const paymentId = params.get('payment_id');
+
+            if (status === 'success' && cursoId && user) {
+                console.log('Detectada redirección de éxito de MP. Registrando curso:', cursoId);
+                const { error, data } = await supabase
+                    .from('inscripciones')
+                    .insert([
+                        {
+                            usuario_id: user.id,
+                            curso_id: cursoId,
+                            payment_id: paymentId,
+                            status: 'approved'
+                        }
+                    ])
+                    .select();
+
+                if (error) {
+                    if (error.code === '23505') {
+                        console.log('El curso ya estaba registrado.');
+                    } else {
+                        console.error('Error al registrar inscripción:', error);
+                        alert('Error al registrar el curso: ' + error.message);
+                    }
+                } else {
+                    console.log('¡Curso registrado con éxito!', data);
+                    alert('¡Inscripción confirmada! Ya podés ver tu curso.');
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            fetchInscripciones();
+        };
+
+        if (user) handleMPRedirect();
+    }, [user]);
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
