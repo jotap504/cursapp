@@ -128,10 +128,10 @@ export default function MyAccount() {
 
     return (
         <div className="min-h-screen bg-background-dark text-slate-100 pt-32 pb-20 px-4 md:px-12">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
 
                 {/* Sidebar Profile Card */}
-                <aside className="lg:col-span-1 space-y-6">
+                <aside className="md:col-span-1 space-y-6">
                     <div className="p-8 rounded-[2.5rem] bg-white/5 border border-primary/20 backdrop-blur-xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-[60px] group-hover:bg-primary/40 transition-colors"></div>
 
@@ -186,7 +186,7 @@ export default function MyAccount() {
                 </aside>
 
                 {/* Main Content Area */}
-                <main className="lg:col-span-3 space-y-12">
+                <main className="md:col-span-3 space-y-12">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
                             <h1 className="text-4xl md:text-5xl font-black tracking-tightest">
