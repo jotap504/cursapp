@@ -15,7 +15,7 @@ export default function CourseReviews({ cursoId, user }) {
         try {
             const { data, error } = await supabase
                 .from('resenas')
-                .select('*, perfiles:usuario_id(nombre, foto)')
+                .select('*, usuarios:usuario_id(nombre, foto)')
                 .eq('curso_id', cursoId)
                 .order('created_at', { ascending: false });
 
@@ -43,7 +43,7 @@ export default function CourseReviews({ cursoId, user }) {
                 .select('id')
                 .eq('usuario_id', user.id)
                 .eq('curso_id', cursoId)
-                .single();
+                .maybeSingle();
             if (!error && data) setHasEnrolled(true);
         } catch (err) {
             console.error('Check enrollment error:', err);
@@ -170,8 +170,8 @@ export default function CourseReviews({ cursoId, user }) {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 bg-slate-800">
-                                        {review.perfiles?.foto ? (
-                                            <img src={review.perfiles.foto} alt="" className="w-full h-full object-cover" />
+                                        {review.usuarios?.foto ? (
+                                            <img src={review.usuarios.foto} alt="" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-slate-500">
                                                 <User size={20} />
@@ -179,7 +179,7 @@ export default function CourseReviews({ cursoId, user }) {
                                         )}
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-black text-slate-100">{review.perfiles?.nombre || 'Alumno'}</h4>
+                                        <h4 className="text-sm font-black text-slate-100">{review.usuarios?.nombre || 'Alumno'}</h4>
                                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{new Date(review.created_at).toLocaleDateString()}</p>
                                     </div>
                                 </div>

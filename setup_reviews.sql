@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS public.resenas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     curso_id UUID REFERENCES public.cursos(id) ON DELETE CASCADE,
-    usuario_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    usuario_id UUID REFERENCES public.usuarios(id) ON DELETE CASCADE,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
     comentario TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),

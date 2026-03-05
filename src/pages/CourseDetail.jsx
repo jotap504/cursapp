@@ -31,7 +31,7 @@ export default function CourseDetail() {
                 .select('id')
                 .eq('usuario_id', user.id)
                 .eq('curso_id', id)
-                .single();
+                .maybeSingle();
             if (!error && data) setEnrolled(true);
         };
 
