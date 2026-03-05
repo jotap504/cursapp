@@ -24,9 +24,9 @@ export const createPreference = async (course, user) => {
                 email: user.email,
             },
             back_urls: {
-                success: `${window.location.origin}/mi-cuenta?status=success`,
-                failure: `${window.location.origin}/mi-cuenta?status=failure`,
-                pending: `${window.location.origin}/mi-cuenta?status=pending`,
+                success: `${window.location.origin}/mi-cuenta?status=success&cursoId=${course.id}`,
+                failure: `${window.location.origin}/mi-cuenta?status=failure&cursoId=${course.id}`,
+                pending: `${window.location.origin}/mi-cuenta?status=pending&cursoId=${course.id}`,
             },
             auto_return: 'approved',
         };

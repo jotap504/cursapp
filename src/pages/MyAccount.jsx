@@ -1,9 +1,57 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../supabase/client';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Settings, BookOpen, CreditCard, LogOut, ChevronRight, User } from 'lucide-react';
+import { Settings, BookOpen, CreditCard, LogOut, ChevronRight, User, ExternalLink } from 'lucide-react';
 
 export default function MyAccount() {
     const { user, logout, claimAdmin } = useAuth();
+    const [inscripciones, setInscripciones] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchInscripciones = async () => {
+        if (!user) return;
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('inscripciones')
+            .select('*, cursos(*)')
+            .eq('usuario_id', user.id);
+
+        if (!error) setInscripciones(data || []);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        const handleMPRedirect = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const status = params.get('status');
+            const cursoId = params.get('cursoId');
+            const paymentId = params.get('payment_id');
+
+            if (status === 'success' && cursoId && user) {
+                // Registrar inscripción si no existe
+                const { error } = await supabase
+                    .from('inscripciones')
+                    .insert([
+                        {
+                            usuario_id: user.id,
+                            curso_id: cursoId,
+                            payment_id: paymentId,
+                            status: 'approved'
+                        }
+                    ]);
+
+                if (!error || error.code === '23505') { // 23505 is unique violation
+                    // Limpiar URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+            fetchInscripciones();
+        };
+
+        if (user) handleMPRedirect();
+    }, [user]);
 
     if (!user) return (
         <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
@@ -94,29 +142,38 @@ export default function MyAccount() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Mocked Course Item */}
-                        <div className="p-6 rounded-[2.5rem] bg-white/5 border border-white/10 group hover:border-primary/50 transition-all cursor-pointer">
-                            <div className="flex gap-6">
-                                <div className="w-24 h-24 rounded-3xl overflow-hidden flex-shrink-0 border border-white/10">
-                                    <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=200" className="w-full h-full object-cover" />
-                                </div>
-                                <div className="flex flex-col justify-center gap-2">
-                                    <h4 className="text-lg font-black group-hover:text-primary transition-colors leading-tight">Medicina Ancestral</h4>
-                                    <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-2">
-                                        <div className="bg-primary h-full w-[65%]"></div>
+                        {loading ? (
+                            <div className="col-span-full py-12 text-center text-slate-500 font-medium italic">
+                                Cargando tus cursos...
+                            </div>
+                        ) : inscripciones.length > 0 ? (
+                            inscripciones.map((ins) => (
+                                <Link key={ins.id} to={`/cursos/${ins.cursos.id}`} className="p-6 rounded-[2.5rem] bg-white/5 border border-white/10 group hover:border-primary/50 transition-all cursor-pointer">
+                                    <div className="flex gap-6">
+                                        <div className="w-24 h-24 rounded-3xl overflow-hidden flex-shrink-0 border border-white/10">
+                                            <img src={ins.cursos.imagen_url || ins.cursos.imagen} alt={ins.cursos.nombre} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="flex flex-col justify-center gap-2">
+                                            <h4 className="text-lg font-black group-hover:text-primary transition-colors leading-tight">{ins.cursos.nombre}</h4>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest">Activo</div>
+                                                <span className="text-[10px] font-bold text-slate-500">Comprado: {new Date(ins.fecha).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary group-hover:gap-2 transition-all">
+                                                Comenzar <ExternalLink size={10} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">65% Completado</span>
+                                </Link>
+                            ))
+                        ) : (
+                            <Link to="/cursos" className="p-6 rounded-[2.5rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group hover:border-primary/50 transition-all cursor-pointer text-slate-500 hover:text-primary">
+                                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                    <BookOpen size={24} />
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Empty State / Add Course */}
-                        <div className="p-6 rounded-[2.5rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group hover:border-primary/50 transition-all cursor-pointer text-slate-500 hover:text-primary">
-                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                                <BookOpen size={24} />
-                            </div>
-                            <span className="text-xs font-black uppercase tracking-widest">Explorar nuevos caminos</span>
-                        </div>
+                                <span className="text-xs font-black uppercase tracking-widest">Explorar nuevos caminos</span>
+                            </Link>
+                        )}
                     </div>
                 </main>
             </div>
