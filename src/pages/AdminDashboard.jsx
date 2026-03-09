@@ -66,13 +66,39 @@ export default function AdminDashboard() {
 }
 
 function AdminHome() {
+    const categories = [
+        { name: 'Cursos', path: '/admin/courses', icon: BookOpen, desc: 'Gestiona tu catálogo de cursos y contenidos.' },
+        { name: 'Soporte (FAQs)', path: '/admin/faqs', icon: HelpCircle, desc: 'Administra las preguntas frecuentes y soporte.' },
+        { name: 'Configuración', path: '/admin/settings', icon: Settings, desc: 'Cambia el logo, colores y textos de la web.' },
+    ];
+
     return (
         <div className="flex flex-col gap-8">
             <header>
                 <h1 className="text-4xl font-black text-slate-100 mb-2 tracking-tighter">Bienvenido, Admin</h1>
-                <p className="text-slate-400 font-medium">Gestiona tu catálogo de cursos y la apariencia de tu web.</p>
+                <p className="text-slate-400 font-medium italic">Selecciona una sección para comenzar la gestión de tu plataforma.</p>
             </header>
 
+            {/* Quick Actions / Navigation Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {categories.map((cat, i) => (
+                    <Link
+                        key={i}
+                        to={cat.path}
+                        className="group bg-white/5 border border-white/10 p-8 rounded-[2.5rem] hover:bg-primary/5 hover:border-primary/30 transition-all flex flex-col gap-4"
+                    >
+                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                            <cat.icon size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-slate-100 mb-1">{cat.name}</h3>
+                            <p className="text-slate-500 text-sm font-medium leading-relaxed">{cat.desc}</p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
+            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[
                     { label: 'Cursos Activos', value: '5', color: 'from-blue-500/20 to-blue-500/5' },
@@ -84,10 +110,6 @@ function AdminHome() {
                         <span className="text-4xl font-black text-slate-100 italic">{stat.value}</span>
                     </div>
                 ))}
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 text-center">
-                <p className="text-slate-400 font-bold mb-4">Selecciona una opción del menú lateral para comenzar.</p>
             </div>
         </div>
     );

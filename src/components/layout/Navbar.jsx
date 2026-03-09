@@ -173,7 +173,7 @@ export default function Navbar() {
                         </NavLink>
                     ))}
                     {isAdmin && (
-                        <NavLink to="/admin"
+                        <NavLink to="/admin/settings"
                             className={({ isActive }) => cn("flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-primary/30 transition-all",
                                 isActive ? "bg-primary text-white" : "text-primary hover:bg-primary/10")}>
                             <ShieldCheck size={14} /> Admin
@@ -226,7 +226,7 @@ export default function Navbar() {
                     </NavLink>
                 ))}
                 {isAdmin && (
-                    <NavLink to="/admin" onClick={() => setIsOpen(false)}
+                    <NavLink to="/admin/settings" onClick={() => setIsOpen(false)}
                         className={({ isActive }) => cn("flex items-center gap-3 text-3xl font-black tracking-tighter transition-colors uppercase",
                             isActive ? "text-primary" : "text-slate-500")}>
                         <ShieldCheck size={32} /> Admin
@@ -260,7 +260,7 @@ export default function Navbar() {
                     <span className="text-[10px] font-bold uppercase tracking-wider">Perfil</span>
                 </NavLink>
                 {isAdmin && (
-                    <NavLink to="/admin" className={({ isActive }) => cn("flex flex-col items-center gap-1", isActive ? "text-primary" : "text-slate-400")}>
+                    <NavLink to="/admin/settings" className={({ isActive }) => cn("flex flex-col items-center gap-1", isActive ? "text-primary" : "text-slate-400")}>
                         <span className="material-symbols-outlined">shield_person</span>
                         <span className="text-[10px] font-bold uppercase tracking-wider">Admin</span>
                     </NavLink>
