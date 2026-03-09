@@ -225,6 +225,13 @@ export default function Navbar() {
                         {link.name}
                     </NavLink>
                 ))}
+                {isAdmin && (
+                    <NavLink to="/admin" onClick={() => setIsOpen(false)}
+                        className={({ isActive }) => cn("flex items-center gap-3 text-3xl font-black tracking-tighter transition-colors uppercase",
+                            isActive ? "text-primary" : "text-slate-500")}>
+                        <ShieldCheck size={32} /> Admin
+                    </NavLink>
+                )}
                 {!user && (
                     <button onClick={() => { setShowAuth(true); setIsOpen(false); }}
                         className="mt-4 bg-primary text-white px-8 py-4 rounded-2xl font-black text-lg shadow-2xl shadow-primary/20 active:scale-95 transition-transform flex items-center gap-2">
@@ -252,6 +259,12 @@ export default function Navbar() {
                     <span className="material-symbols-outlined">person</span>
                     <span className="text-[10px] font-bold uppercase tracking-wider">Perfil</span>
                 </NavLink>
+                {isAdmin && (
+                    <NavLink to="/admin" className={({ isActive }) => cn("flex flex-col items-center gap-1", isActive ? "text-primary" : "text-slate-400")}>
+                        <span className="material-symbols-outlined">shield_person</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Admin</span>
+                    </NavLink>
+                )}
             </nav>
 
             {/* Auth Modal */}
