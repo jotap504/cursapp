@@ -1,44 +1,73 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Sparkles, User, Bot, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, User, Bot, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useSettings } from '../../hooks/useSettings';
+import { supabase } from '../../supabase/client';
 
-const DEEPSEEK_API_KEY = "YOUR_DEEPSEEK_API_KEY";
-const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
-
-const SYSTEM_PROMPT = `
-Eres un asistente experto en medicina holística, bienestar integral y salud alternativa para la plataforma "HolísticaApp".
-Tu tono es amigable, profesional, empático y cercano.
-
-Identidad de marca: HolísticaApp es un espacio de transformación personal a través de cursos online.
-Tu misión:
-1. Responder preguntas sobre nuestros cursos (Herbolaria, Meditación, Nutrición Holística).
-2. Explicar los beneficios de la medicina holística.
-3. Informar sobre modalidades de pago (Mercado Pago), certificaciones y acceso a la plataforma.
-
-RESTRICCIÓN CRÍTICA:
-- NO des diagnósticos médicos ni prescripciones específicas.
-- Si te preguntan por una enfermedad grave, sugiere siempre consultar con un profesional de la salud.
-- Enfócate en la prevención, el equilibrio y el bienestar natural.
-`;
+const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
 
 export default function ChatbotWidget() {
+    const { settings } = useSettings();
     const [isOpen, setIsOpen] = useState(false);
+    const [faqs, setFaqs] = useState([]);
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: '¡Hola! Soy tu guía holística. ¿En qué puedo ayudarte hoy en tu camino de bienestar?' }
+        { role: 'assistant', content: '¡Hola! 🙌 Bienvenido a ' + (settings.nombre_pagina || 'nuestra plataforma') + '. Soy Lucía, parte del equipo. ¿En qué te puedo dar una mano hoy?' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef(null);
 
+    const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY;
+
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            const { data } = await supabase.from('faqs').select('pregunta, respuesta');
+            if (data) setFaqs(data);
+        };
+        fetchFaqs();
+    }, []);
+
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages, isLoading]);
+
+    const getSystemPrompt = () => {
+        const faqContext = faqs.map(f => `P: ${f.pregunta}\nR: ${f.respuesta}`).join('\n\n');
+        return `
+Eres Lucía, una asistente real del equipo de "${settings.nombre_pagina}". 
+Tu objetivo es ayudar a los alumnos y personas interesadas de forma humana, empática y resolutiva. 
+
+REGLAS DE ORO (ESTILO WHATSAPP):
+1. NO digas que eres una IA. Si te preguntan, di que eres parte del equipo de soporte.
+2. Usa un tono informal y cercano (Español de Argentina/Latino, usa "voseo" si es natural).
+3. Usa emojis de forma moderada pero natural (🙌, ✨, 😊, 👍).
+4. Escribe mensajes cortos. Evita bloques de texto gigantes.
+5. Si no sabes algo, di que vas a consultar con el equipo técnico y que te dejen su mail.
+
+CONTEXTO DE LA WEB:
+- Nombre: ${settings.nombre_pagina}
+- Email de contacto: ${settings.contacto?.email}
+- Teléfono: ${settings.contacto?.telefono}
+- Misión: ${settings.hero_titulo}
+
+CONOCIMIENTO ESPECÍFICO (FAQs):
+${faqContext}
+
+IMPORTANTE: 
+- Solo responde sobre temas de la plataforma y bienestar.
+- No des diagnósticos médicos, somos una plataforma de cursos.
+`;
+    };
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
+        if (!API_KEY || API_KEY === 'your_api_key_here') {
+            setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Por favor, configura tu API KEY de DeepSeek para que pueda responderte.' }]);
+            return;
+        }
 
         const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
@@ -51,14 +80,15 @@ export default function ChatbotWidget() {
                 {
                     model: "deepseek-chat",
                     messages: [
-                        { role: "system", content: SYSTEM_PROMPT },
-                        ...messages,
-                        userMessage
-                    ]
+                        { role: "system", content: getSystemPrompt() },
+                        ...messages.map(m => ({ role: m.role, content: m.content })),
+                        { role: "user", content: input }
+                    ],
+                    temperature: 0.7
                 },
                 {
                     headers: {
-                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+                        'Authorization': `Bearer ${API_KEY}`,
                         'Content-Type': 'application/json'
                     }
                 }
@@ -68,15 +98,14 @@ export default function ChatbotWidget() {
             setMessages(prev => [...prev, botMessage]);
         } catch (error) {
             console.error("Chatbot Error:", error);
-            setMessages(prev => [...prev, { role: 'assistant', content: 'Lo siento, estoy teniendo problemas para conectar. ¿Podrías intentar de nuevo más tarde?' }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: 'Uy, se me cortó la conexión. ¿Me repetís lo último o intentamos en un ratito? ✨' }]);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
-
+        <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end font-sans">
             {/* WhatsApp Window */}
             <AnimatePresence>
                 {isOpen && (
@@ -88,14 +117,18 @@ export default function ChatbotWidget() {
                     >
                         {/* WhatsApp Header */}
                         <div className="bg-[#075e54] p-4 text-white flex items-center gap-3 shadow-md">
-                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
-                                <img src="/logo.png" alt="bot" className="w-full h-full object-cover" onError={(e) => e.target.src = "https://ui-avatars.com/api/?name=Guia+Holistica&background=128C7E&color=fff"} />
+                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border border-white/20">
+                                <img
+                                    src={settings.logo_url || "https://ui-avatars.com/api/?name=Lucia+Support&background=128C7E&color=fff"}
+                                    alt="bot"
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
                             <div className="flex-1">
-                                <h4 className="font-bold text-sm leading-tight">Guía Holística</h4>
+                                <h4 className="font-bold text-sm leading-tight">Lucía ✨</h4>
                                 <div className="flex items-center gap-1">
-                                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                                    <p className="text-[10px] text-white/80 font-medium">En línea</p>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                                    <p className="text-[10px] text-white/80 font-medium">en línea</p>
                                 </div>
                             </div>
                             <button
@@ -109,25 +142,36 @@ export default function ChatbotWidget() {
                         {/* WhatsApp Messages Area */}
                         <div
                             ref={scrollRef}
-                            className="flex-grow overflow-y-auto p-4 flex flex-col gap-2 relative"
-                            style={{ backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')", backgroundSize: 'contain' }}
+                            className="flex-grow overflow-y-auto p-4 flex flex-col gap-2 relative scroll-smooth"
+                            style={{
+                                backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')",
+                                backgroundSize: '400px',
+                                backgroundRepeat: 'repeat'
+                            }}
                         >
+                            <div className="mx-auto bg-[#c6e9ff] text-[#075e54] text-[10px] font-bold px-3 py-1 rounded-md shadow-sm mb-4 uppercase tracking-wider">
+                                Hoy
+                            </div>
+
                             {messages.map((m, idx) => (
-                                <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] p-2 rounded-lg text-sm shadow-sm relative ${m.role === 'user'
-                                        ? 'bg-[#dcf8c6] text-slate-800'
-                                        : 'bg-white text-slate-800'
+                                <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                                    <div className={`max-w-[85%] p-2.5 rounded-lg text-sm shadow-sm relative ${m.role === 'user'
+                                        ? 'bg-[#dcf8c6] text-slate-800 rounded-tr-none'
+                                        : 'bg-white text-slate-800 rounded-tl-none'
                                         }`}>
-                                        <p className="leading-relaxed">{m.content}</p>
-                                        <span className="text-[9px] text-slate-400 float-right mt-1 ml-2 font-medium">
-                                            {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                                        <p className="leading-relaxed whitespace-pre-wrap">{m.content}</p>
+                                        <div className="flex items-center justify-end gap-1 mt-1">
+                                            <span className="text-[9px] text-slate-400 font-medium">
+                                                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                            {m.role === 'user' && <span className="text-blue-400 text-[10px]">✓✓</span>}
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                             {isLoading && (
                                 <div className="flex justify-start">
-                                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                                    <div className="bg-white p-3 rounded-lg rounded-tl-none shadow-sm">
                                         <div className="flex gap-1">
                                             <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" />
                                             <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]" />
@@ -139,7 +183,7 @@ export default function ChatbotWidget() {
                         </div>
 
                         {/* WhatsApp Input Area */}
-                        <div className="p-2 bg-[#f0f0f0] flex items-center gap-2">
+                        <div className="p-2.5 bg-[#f0f0f0] flex items-center gap-2">
                             <div className="flex-1 relative">
                                 <input
                                     type="text"
