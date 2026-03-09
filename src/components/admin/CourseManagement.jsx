@@ -90,41 +90,63 @@ export default function CourseManagement() {
     const uploadAll = async () => {
         if (!uploadQueue.some(i => i.status === 'pending')) return;
         setIsUploading(true);
+        console.log('--- Iniciando proceso de subida ---');
 
         const courseId = editingCourse?.id || `temp_${Date.now()}`;
         const updater = (idx, patch) =>
             setUploadQueue(prev => prev.map((item, i) => i === idx ? { ...item, ...patch } : item));
 
         const newArchivos = [];
-        for (let i = 0; i < uploadQueue.length; i++) {
-            const item = uploadQueue[i];
-            if (item.status !== 'pending') continue;
-            updater(i, { status: 'uploading' });
+        try {
+            for (let i = 0; i < uploadQueue.length; i++) {
+                const item = uploadQueue[i];
+                if (item.status !== 'pending') continue;
 
-            const path = `courses/${courseId}/${Date.now()}_${item.file.name}`;
-            const { data, error } = await supabase.storage
-                .from('course-files')
-                .upload(path, item.file, { upsert: true });
+                console.log(`Subiendo archivo: ${item.file.name}...`);
+                updater(i, { status: 'uploading' });
 
-            if (error) {
-                console.error('Upload error:', error);
-                updater(i, { status: 'error' });
-                alert(`Error al subir ${item.file.name}: ${error.message}`);
-            } else {
-                const { data: urlData } = supabase.storage.from('course-files').getPublicUrl(data.path);
-                updater(i, { status: 'done', progress: 100, url: urlData.publicUrl });
-                newArchivos.push({
-                    nombre: item.file.name,
-                    url: urlData.publicUrl,
-                    tipo: item.file.type,
-                    tamaño: item.file.size,
-                    fecha: new Date().toISOString()
-                });
+                const path = `courses/${courseId}/${Date.now()}_${item.file.name}`;
+
+                try {
+                    const { data, error } = await supabase.storage
+                        .from('course-files')
+                        .upload(path, item.file, {
+                            upsert: true,
+                            cacheControl: '3600'
+                        });
+
+                    if (error) {
+                        console.error(`Error de Supabase al subir ${item.file.name}:`, error);
+                        updater(i, { status: 'error' });
+                        alert(`Error al subir ${item.file.name}: ${error.message}`);
+                    } else if (data) {
+                        console.log(`Subida exitosa: ${item.file.name}. Obteniendo URL pública...`);
+                        const { data: urlData } = supabase.storage.from('course-files').getPublicUrl(data.path);
+
+                        updater(i, { status: 'done', progress: 100, url: urlData.publicUrl });
+                        newArchivos.push({
+                            nombre: item.file.name,
+                            url: urlData.publicUrl,
+                            tipo: item.file.type,
+                            tamaño: item.file.size,
+                            fecha: new Date().toISOString()
+                        });
+                    }
+                } catch (innerError) {
+                    console.error(`Excepción interna subiendo ${item.file.name}:`, innerError);
+                    updater(i, { status: 'error' });
+                }
             }
+        } catch (globalError) {
+            console.error('Error global en el bucle de subida:', globalError);
+            alert('Ocurrió un error inesperado durante la subida.');
+        } finally {
+            if (newArchivos.length > 0) {
+                setFormData(prev => ({ ...prev, archivos: [...(prev.archivos || []), ...newArchivos] }));
+            }
+            setIsUploading(false);
+            console.log('--- Proceso de subida finalizado ---');
         }
-
-        setFormData(prev => ({ ...prev, archivos: [...(prev.archivos || []), ...newArchivos] }));
-        setIsUploading(false);
     };
 
     const removeArchivoGuardado = async (idx) => {
