@@ -160,29 +160,70 @@ export default function CourseManagement() {
     // ── Save course ──
     const handleSave = async (e) => {
         e.preventDefault();
+        console.log('--- Iniciando guardado de curso ---');
+        console.log('Datos actuales en formData:', formData);
+
         if (uploadQueue.some(i => i.status === 'pending')) {
             alert('Tenés archivos sin subir. Hacé clic en "Subir" primero.');
             return;
         }
+
+        // Mapeo explícito para evitar enviar campos extra que no existan en la DB
         const courseData = {
-            ...formData,
+            nombre: formData.nombre,
             precio: Number(formData.precio),
+            categoria: formData.categoria,
+            descripcion: formData.descripcion,
+            imagen_url: formData.imagen_url,
+            video_url: formData.video_url,
+            duracion: formData.duracion,
+            nivel: formData.nivel,
+            acceso: formData.acceso,
+            certificado: formData.certificado,
+            temario: formData.temario || [],
+            archivos: formData.archivos || [],
+            activo: formData.activo,
             fecha_actualizacion: new Date().toISOString()
         };
+
+        console.log('Datos procesados para enviar a Supabase:', courseData);
+
         try {
             if (editingCourse) {
-                const { error } = await supabase.from('cursos').update(courseData).eq('id', editingCourse.id);
-                if (error) throw error;
+                console.log(`Actualizando curso ID: ${editingCourse.id}`);
+                const { data, error } = await supabase
+                    .from('cursos')
+                    .update(courseData)
+                    .eq('id', editingCourse.id)
+                    .select(); // Pedimos el retorno para verificar
+
+                if (error) {
+                    console.error('Error de Supabase (Update):', error);
+                    throw error;
+                }
+                console.log('Respuesta exitosa (Update):', data);
             } else {
-                const { error } = await supabase.from('cursos').insert({ ...courseData, fecha_creacion: new Date().toISOString() });
-                if (error) throw error;
+                console.log('Insertando nuevo curso');
+                const { data, error } = await supabase
+                    .from('cursos')
+                    .insert([{ ...courseData, fecha_creacion: new Date().toISOString() }])
+                    .select();
+
+                if (error) {
+                    console.error('Error de Supabase (Insert):', error);
+                    throw error;
+                }
+                console.log('Respuesta exitosa (Insert):', data);
             }
+
             closeModal();
-            fetchCourses();
+            await fetchCourses();
             alert('Curso guardado correctamente');
         } catch (error) {
-            console.error('Save error:', error);
-            alert('Error al guardar el curso: ' + (error.message || 'Error desconocido'));
+            console.error('Error capturado en handleSave:', error);
+            alert('Error al guardar el curso: ' + (error.message || 'Error desconocido. Revisa la consola (F12)'));
+        } finally {
+            console.log('--- Fin del proceso de guardado ---');
         }
     };
 
